@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.37111.16 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XRay Earth", "XRay Earth\XRay Earth.csproj", "{65F35733-5684-4424-9DF3-FCA4621ACD6F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{65F35733-5684-4424-9DF3-FCA4621ACD6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65F35733-5684-4424-9DF3-FCA4621ACD6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65F35733-5684-4424-9DF3-FCA4621ACD6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65F35733-5684-4424-9DF3-FCA4621ACD6F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {88C777FC-27BA-432B-89E9-029304922DC0}
+	EndGlobalSection
+EndGlobal
