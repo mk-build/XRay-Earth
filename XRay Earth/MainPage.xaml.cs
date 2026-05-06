@@ -28,7 +28,7 @@
             if (OrientationSensor.Default.IsSupported)
             {
                 OrientationSensor.Default.ReadingChanged += OnOrientationChanged;
-                OrientationSensor.Default.Start(SensorSpeed.UI);
+                OrientationSensor.Default.Start(SensorSpeed.Fastest);
             }
         }
 

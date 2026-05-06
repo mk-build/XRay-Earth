@@ -17,8 +17,8 @@ namespace XRay_Earth
         private const string SCREEN_SIZE_ERROR = "Screen dimensions must be greater than zero.";
         private readonly object _lock = new object();
 
-        private Matrix4 _viewMatrix;
-        private Matrix4? _projectionMatrix;
+        private float[] _viewArray = new float[16];
+        private float[] _projectionArray;
 
         private Vector3 _eye = new Vector3(0.0f, -5.0f, 0.0f);
 
@@ -114,27 +114,27 @@ namespace XRay_Earth
             }
         }
 
-        public Matrix4 ViewMatrix
+        public float[] ViewArray
         {
             get
             {
-                    return _viewMatrix;
+                    return _viewArray;
             }
         }
 
-        public Matrix4 ProjectionMatrix
+        public float[] ProjectionArray
         {
             get
             {
-                    if (_projectionMatrix == null)
+                if (_projectionArray == null)
                         throw new InvalidOperationException("Projection matrix has not been calculated yet. Set screen dimensions first.");
-                    return _projectionMatrix.Value;
+                return _projectionArray;
             }
         }
 
         public void UpdateViewMatrix()
         {
-            _currentRotation = Quaternion.Slerp(_currentRotation, _targetRotation, 0.2f);
+            _currentRotation = Quaternion.Slerp(_currentRotation, _targetRotation, 1f);
             RecalculateViewMatrix();
         }
 
@@ -142,19 +142,25 @@ namespace XRay_Earth
         {
                 Matrix4 rotation = Matrix4.CreateFromQuaternion(_currentRotation);
                 Matrix4 translation = Matrix4.CreateTranslation(-_eye);
-                _viewMatrix = translation * rotation;
+                Matrix4 viewMatrix = translation * rotation;
+
+                UtilLib.FillMatrix4Array(viewMatrix, _viewArray);
         }
 
         private void RecalculateProjectionMatrix()
         {
                 if (_width <= 0 || _height <= 0) return;
 
-                _projectionMatrix = Matrix4.CreatePerspectiveFieldOfView(
+                Matrix4 projectionMatrix = Matrix4.CreatePerspectiveFieldOfView(
                     MathHelper.DegreesToRadians(_fov),
                     (float)_width / _height,
                     _depthNear,
                     _depthFar
                 );
+
+                float[] projectionArray = new float[16];
+                UtilLib.FillMatrix4Array(projectionMatrix, projectionArray);
+                _projectionArray = projectionArray;
         }
     }
 }

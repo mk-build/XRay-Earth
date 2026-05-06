@@ -6,22 +6,17 @@ using System.Threading.Tasks;
 
 namespace XRay_Earth
 {
-    internal class ObjMesh
+    internal class ObjGeometry
     {
 
-        private float[] _meshArray;
+        private float[] _geometryArray;
         private int[] _indexArray;
 
         public bool IsLoaded { get; private set; } = false;
 
-        public ObjMesh()
+        public ObjGeometry(string filename)
         {
-
-        }
-
-        public ObjMesh(string filename)
-        {
-           _ = LoadFromObj(filename);
+            _ = LoadFromObj(filename);
         }
 
         public float[] MeshArray
@@ -33,7 +28,7 @@ namespace XRay_Earth
                     System.Diagnostics.Debug.WriteLine("Warning: MeshArray accessed before mesh was loaded.");
                     return Array.Empty<float>();
                 }
-                return _meshArray;
+                return _geometryArray;
             }
         }
 
@@ -51,54 +46,65 @@ namespace XRay_Earth
         }
 
 
-        public async Task LoadFromObj(string filename)
+        private async Task LoadFromObj(string filename)
         {
-            using var stream = await FileSystem.OpenAppPackageFileAsync(filename);
-            using var reader = new StreamReader(stream);
 
-            List<float> v = new List<float>();
-            List<float> vt = new List<float>();
-            List<float> vn = new List<float>();
-            int nextIndex = 0;
-
-            List<float> meshList = new List<float>();
-            List<int> IndexList = new List<int>();
-
-
-        Dictionary<(int vIndex, int vtIndex, int vnIndex), int> indexDictionary = new Dictionary<(int vIndex, int vtIndex, int vnIndex), int>();
-
-            string line;
-
-            while ((line = await reader.ReadLineAsync()) != null)
+            try
             {
-                if (line.Length < 2) continue;
+                using var stream = await FileSystem.OpenAppPackageFileAsync(filename);
+                using var reader = new StreamReader(stream);
 
-                string lineCode = "" + line[0] + line[1];
+                List<float> v = new List<float>();
+                List<float> vt = new List<float>();
+                List<float> vn = new List<float>();
+                int nextIndex = 0;
 
-                switch (lineCode)
+                List<float> meshList = new List<float>();
+                List<int> IndexList = new List<int>();
+
+
+                Dictionary<(int vIndex, int vtIndex, int vnIndex), int> indexDictionary = new Dictionary<(int vIndex, int vtIndex, int vnIndex), int>();
+
+                string line;
+
+                while ((line = await reader.ReadLineAsync()) != null)
                 {
-                    case "v ":
-                        ParseVertexData(line, v);
-                        break;
+                    if (line.Length < 2) continue;
 
-                    case "vn":
-                        ParseVertexData(line, vn);
-                        break;
+                    string lineCode = "" + line[0] + line[1];
 
-                    case "vt":
-                        ParseVertexData(line, vt);
-                        break;
+                    switch (lineCode)
+                    {
+                        case "v ":
+                            ParseVertexData(line, v);
+                            break;
 
-                    case "f ":
-                        ParseFace(line, indexDictionary, v, vn, vt, ref nextIndex,meshList,IndexList);
-                        break;
-                } 
+                        case "vn":
+                            ParseVertexData(line, vn);
+                            break;
+
+                        case "vt":
+                            ParseVertexData(line, vt);
+                            break;
+
+                        case "f ":
+                            ParseFace(line, indexDictionary, v, vn, vt, ref nextIndex, meshList, IndexList);
+                            break;
+                    }
+
+                }
+                _geometryArray = meshList.ToArray();
+                _indexArray = IndexList.ToArray();
+                IsLoaded = true;
 
             }
-            _meshArray = meshList.ToArray();
-            _indexArray = IndexList.ToArray();
-            IsLoaded = true;
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"LoadFromObj error: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine(ex.StackTrace);
+            }
         }
+           
 
         private void ParseVertexData(string line, List<float> list)
         {
