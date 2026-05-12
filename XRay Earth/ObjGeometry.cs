@@ -66,12 +66,13 @@ namespace XRay_Earth
                 Dictionary<(int vIndex, int vtIndex, int vnIndex), int> indexDictionary = new Dictionary<(int vIndex, int vtIndex, int vnIndex), int>();
 
                 string line;
+                string lineCode;
 
                 while ((line = await reader.ReadLineAsync()) != null)
                 {
                     if (line.Length < 2) continue;
 
-                    string lineCode = "" + line[0] + line[1];
+                    lineCode = "" + line[0] + line[1];
 
                     switch (lineCode)
                     {
@@ -105,7 +106,8 @@ namespace XRay_Earth
             }
         }
            
-
+        // Each non-index line of an OBJ file has 2 or 3 floats and a type Code
+        // This breaks each line apart, discards the type code and adds the floats to the approtiate array.
         private void ParseVertexData(string line, List<float> list)
         {
             string[] lineElements = line.Split(' ');
@@ -116,6 +118,14 @@ namespace XRay_Earth
             }
         }
 
+        // Face parsing explanation:
+        // OBJ face lines contain 3 index triplets (position/UV/normal) per face.
+        // Each triplet is split into its three indices and checked against the dictionary
+        // since duplicate vertex combinations aren't allowed in the interleaved array.
+        // If the triplet already exists, its index is reused in the index list.
+        // If not, the corresponding values are pulled from the raw data arrays and added
+        // to the vertex array in interleaved order (position, UV, normal),
+        // the triplet is registered in the dictionary, and a new index is added to the index list.
         private void ParseFace(string line, Dictionary<(int vIndex, int vtIndex, int vnIndex), int> indexDictionary, List<float> v, List<float> vn, List<float> vt, ref int nextIndex, List<float> meshList, List<int> IndexList)
         {
             string[] lineElements = line.Split(' ');
@@ -132,7 +142,10 @@ namespace XRay_Earth
                 else
                 {
                     IndexList.Add(nextIndex);
-                    indexDictionary.Add((faceIndices[0], faceIndices[1], faceIndices[2]), nextIndex++);
+                    indexDictionary.Add((faceIndices[0], faceIndices[1], faceIndices[2]), nextIndex);
+                    nextIndex++;
+
+                    //  - 1 is needed at start because OBJ face indices are 1 indexed.
 
                     int start = (faceIndices[0] - 1) * 3;
                     meshList.Add(v[start]);

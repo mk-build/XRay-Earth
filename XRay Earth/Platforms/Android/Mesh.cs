@@ -88,6 +88,9 @@ namespace XRay_Earth.Platforms.Android
 
         private void SetupBuffers()
         {
+
+            // Gets empty buffer IDs for later use.
+            // Doesn't allocate any space yet.
             int[] buffers = new int[2];
             GLES20.GlGenBuffers(2, buffers, 0);
             _vertexBuffer = buffers[0];
@@ -122,30 +125,43 @@ namespace XRay_Earth.Platforms.Android
                 RebuildModelArray();
             }            
 
+            //  Sets the model matrix array for the current mesh. This matrix contains the meshes position, rotation and scale.
             GLES20.GlUniformMatrix4fv(_shaderProgram.GetUniformLocation(_shaderProgram.UniformNames[0]), 1, false, _modelArray, 0);
-            GLES20.GlUniformMatrix4fv(_shaderProgram.GetUniformLocation(_shaderProgram.UniformNames[1]), 1, false, Camera.Instance.ViewArray, 0);
-            GLES20.GlUniformMatrix4fv(_shaderProgram.GetUniformLocation(_shaderProgram.UniformNames[2]), 1, false, Camera.Instance.ProjectionArray, 0);
 
+            // sets up texture to be used on the mesh if there is a texture
             if (_texture != null)
             {
+                // "hey use slot 0 for this texture.
                 GLES20.GlActiveTexture(GLES20.GlTexture0);
+                //  Put this texture in the slot we're using
                 GLES20.GlBindTexture(GLES20.GlTexture2d, _texture.ID);
-                GLES20.GlUniform1i(_shaderProgram.GetUniformLocation(_shaderProgram.UniformNames[3]), 0);
+                // When you render, The texture you need is in slot 0
+                GLES20.GlUniform1i(_shaderProgram.GetUniformLocation(_shaderProgram.UniformNames[3]), 0);   
             }
+
+            // Sets the vertex and index buffers that will be used in the next drawcall.
             GLES20.GlBindBuffer(GLES20.GlArrayBuffer, _vertexBuffer);
             GLES20.GlBindBuffer(GLES20.GlElementArrayBuffer, _indexBuffer);
 
+            // enables attribute slots for position, UV and normal attribures.
             GLES20.GlEnableVertexAttribArray(0);
             GLES20.GlEnableVertexAttribArray(1);
             GLES20.GlEnableVertexAttribArray(2);
+
+            // Tells the GPU what part of the vertex array contrains what info
+            // Position: slot 0, 3 values, starts at byte 0
+            // UV: Slot 1, 2 values, starts at byte 12
+            // Normals: Slot 2, 3 values, starts at byte 20
             GLES20.GlVertexAttribPointer(0, 3, GLES20.GlFloat, false, 32, 0);
             GLES20.GlVertexAttribPointer(1, 2, GLES20.GlFloat, false, 32, 12);
             GLES20.GlVertexAttribPointer(2, 3, GLES20.GlFloat, false, 32, 20);
 
+            // Draw!
             GLES20.GlDrawElements(GLES20.GlTriangles, _geometry.IndexArray.Length, GLES20.GlUnsignedInt, 0);
 
         }
 
+        // Puts the seperate position, rotation and scale vectors into a single model matrix and converts that matrix to an array.
         private void RebuildModelArray()
         {     
             Matrix4 t = Matrix4.CreateTranslation(_position);
@@ -164,14 +180,17 @@ namespace XRay_Earth.Platforms.Android
             float[] meshArray = _geometry.MeshArray;
             int[] indexArray = _geometry.IndexArray;
 
-            var vertexData = Java.Nio.ByteBuffer
-                .AllocateDirect(meshArray.Length * 4)
-                .Order(Java.Nio.ByteOrder.NativeOrder())
-                .AsFloatBuffer();
-            vertexData.Put(meshArray);
-            vertexData.Position(0);
+            // Puts the vertex and index arrays into shared memory outside of .Net head that GPU can access.
 
-            GLES20.GlBindBuffer(GLES20.GlArrayBuffer, _vertexBuffer);
+            var vertexData = Java.Nio.ByteBuffer        //  Creates a raw byte buffer
+                .AllocateDirect(meshArray.Length * 4)   //  Byte size of our buffer is array length * 4 (4 bytes per float)
+                .Order(Java.Nio.ByteOrder.NativeOrder())//  Order them in Native order whatever that is.
+                .AsFloatBuffer();                       //  Pretend it's a float buffer so we can put floats in easily
+            vertexData.Put(meshArray);  //  Actually upload the array to the new byte buffer
+            vertexData.Position(0);     //  Reset internal caret back to 0 for when the GPU reads the data
+
+            //  Actually upload our new byte buffer to the GPU
+            GLES20.GlBindBuffer(GLES20.GlArrayBuffer, _vertexBuffer);   //  Use this buffer ID for whats to come
             GLES20.GlBufferData(GLES20.GlArrayBuffer, meshArray.Length * 4, vertexData, GLES20.GlStaticDraw);
 
             var indexData = Java.Nio.ByteBuffer

@@ -21,9 +21,9 @@ namespace XRay_Earth
         }
 
 
-        public ShaderProgram(string vertexShaderSource, string fragementShaderSource, string[] attributeNames, string[] uniformNames = null)
+        public ShaderProgram(string vertexShaderSource, string fragementShaderSource, string[] attributeNames, string[] uniformNames)
         {
-            _uniformNames = uniformNames ?? new string[] { "uModel","uView","uProjection" };
+            _uniformNames = uniformNames;
             _programID = BuildProgram(vertexShaderSource, fragementShaderSource, attributeNames);
         }
 
@@ -32,6 +32,9 @@ namespace XRay_Earth
             get { return _uniformNames; }
         }
 
+
+        // Gets uniform locations from the GPU as needed.
+        // Saves them to a dictionary to avoid repeated GPU calls.
         public int GetUniformLocation(string uniform)
         {
             int location;
@@ -58,17 +61,24 @@ namespace XRay_Earth
             int vertexShader = CompileShader(GLES20.GlVertexShader, vertexSource);
             int fragmentShader = CompileShader(GLES20.GlFragmentShader, fragmentSource);
 
+            // Create a shader program and attach both compiled shaders to it —
+            // the program is the complete vertex+fragment pipeline used for drawing
             int program = GLES20.GlCreateProgram();
             GLES20.GlAttachShader(program, vertexShader);
             GLES20.GlAttachShader(program, fragmentShader);
 
-            for(int i = 0; i < attributeNames.Length; i++)
+            // Bind each attribute name to a slot number — must match the slots
+            // used in GlVertexAttribPointer and the attribute declarations in the vertex shader
+            for (int i = 0; i < attributeNames.Length; i++)
             {
                 GLES20.GlBindAttribLocation(program, i, attributeNames[i]);
             }
 
+            // Compiles vertex and fragment shader programs into a complete shader program
             GLES20.GlLinkProgram(program);
 
+            // Clears seperated shader programs from GPU memory.
+            // We only need the final compiled shader from here on
             GLES20.GlDetachShader(program, vertexShader);
             GLES20.GlDetachShader(program, fragmentShader);
             GLES20.GlDeleteShader(vertexShader);
@@ -79,10 +89,14 @@ namespace XRay_Earth
 
         private int CompileShader(int type, string source)
         {
-            int shader = GLES20.GlCreateShader(type);
-            GLES20.GlShaderSource(shader, source);
+
+            // Create a shader object on the GPU (vertex or fragment depending on type),
+            // load the GLSL source into it, and compile it
+            int shader = GLES20.GlCreateShader(type);   
+            GLES20.GlShaderSource(shader, source);  
             GLES20.GlCompileShader(shader);
 
+            // Check if compilation succeeded — if not, fetch the error log from the GPU and throw
             int[] compiled = new int[1];
             GLES20.GlGetShaderiv(shader, GLES20.GlCompileStatus, compiled, 0);
             if (compiled[0] == 0)
