@@ -1,11 +1,12 @@
-﻿using Android.Opengl;
+﻿using Android.Graphics;
+using Android.Opengl;
+using Android.Renderscripts;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OpenTK.Mathematics;
-using Android.Renderscripts;
 
 namespace XRay_Earth.Platforms.Android
 {
@@ -125,8 +126,13 @@ namespace XRay_Earth.Platforms.Android
                 RebuildModelArray();
             }            
 
-            //  Sets the model matrix array for the current mesh. This matrix contains the meshes position, rotation and scale.
+            //  Sets the model, view and projection matrix arrays for the current mesh.
+            //  Model matrix contains position, rotation and scaling information for the mesh
+            //  View matrix contains position and rotation information for the camera
+            //  Projection matrix contains camera properties such as fov, display size and clipping plane distances.
             GLES20.GlUniformMatrix4fv(_shaderProgram.GetUniformLocation(_shaderProgram.UniformNames[0]), 1, false, _modelArray, 0);
+            GLES20.GlUniformMatrix4fv(_shaderProgram.GetUniformLocation(_shaderProgram.UniformNames[1]), 1, false, Camera.Instance.ViewArray, 0);
+            GLES20.GlUniformMatrix4fv(_shaderProgram.GetUniformLocation(_shaderProgram.UniformNames[2]), 1, false, Camera.Instance.ProjectionArray, 0);
 
             // sets up texture to be used on the mesh if there is a texture
             if (_texture != null)
@@ -164,11 +170,13 @@ namespace XRay_Earth.Platforms.Android
         // Puts the seperate position, rotation and scale vectors into a single model matrix and converts that matrix to an array.
         private void RebuildModelArray()
         {     
-            Matrix4 t = Matrix4.CreateTranslation(_position);
-            Matrix4 r = Matrix4.CreateFromQuaternion(_rotation);
-            Matrix4 s = Matrix4.CreateScale(_scale);
+            Matrix4 translation = Matrix4.CreateTranslation(_position);
+            Matrix4 rotation = Matrix4.CreateFromQuaternion(_rotation);
+            Matrix4 scale = Matrix4.CreateScale(_scale);
 
-            Matrix4 modelMatrix = t * r * s;
+            //  Multiplies the different transfomations together. ORDER MATTERS!!!!
+            //  Transformations are applied left to right and reordering will cause problems.
+            Matrix4 modelMatrix = scale * rotation * translation;
 
             UtilLib.FillMatrix4Array(modelMatrix, _modelArray);
 
@@ -180,7 +188,7 @@ namespace XRay_Earth.Platforms.Android
             float[] meshArray = _geometry.MeshArray;
             int[] indexArray = _geometry.IndexArray;
 
-            // Puts the vertex and index arrays into shared memory outside of .Net head that GPU can access.
+            // Puts the vertex and index arrays into shared memory outside of .Net heap that GPU can access.
 
             var vertexData = Java.Nio.ByteBuffer        //  Creates a raw byte buffer
                 .AllocateDirect(meshArray.Length * 4)   //  Byte size of our buffer is array length * 4 (4 bytes per float)

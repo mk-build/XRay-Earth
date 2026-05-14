@@ -144,7 +144,6 @@ namespace XRay_Earth
                     IndexList.Add(nextIndex);
                     indexDictionary.Add((faceIndices[0], faceIndices[1], faceIndices[2]), nextIndex);
                     nextIndex++;
-
                     //  - 1 is needed at start because OBJ face indices are 1 indexed.
 
                     int start = (faceIndices[0] - 1) * 3;

@@ -12,7 +12,7 @@ namespace XRay_Earth.Platforms.Android
         {
 
             //  Sets background color
-            GLES20.GlClearColor(0.2f, 0.0f, 0.4f, 1.0f);
+            GLES20.GlClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             GLES20.GlEnable(GLES20.GlDepthTest);
             Scene.Instance.Initialize();
 
@@ -38,11 +38,6 @@ namespace XRay_Earth.Platforms.Android
                 {
                     GLES20.GlUseProgram(mesh.ShaderProgram.ProgramID);
                     shaderProgramID = mesh.ShaderProgram.ProgramID;
-
-                    // Sets view and projection matrices for all meshes using this shader program.
-                    // Done once per program switch since these are the same for every mesh in the scene.
-                    GLES20.GlUniformMatrix4fv(mesh.ShaderProgram.GetUniformLocation(mesh.ShaderProgram.UniformNames[1]), 1, false, Camera.Instance.ViewArray, 0);
-                    GLES20.GlUniformMatrix4fv(mesh.ShaderProgram.GetUniformLocation(mesh.ShaderProgram.UniformNames[2]), 1, false, Camera.Instance.ProjectionArray, 0);
                 }
 
                 mesh.Draw();

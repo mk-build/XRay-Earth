@@ -20,7 +20,7 @@ namespace XRay_Earth
         private float[] _viewArray = new float[16];
         private float[] _projectionArray;
 
-        private Vector3 _eye = new Vector3(0.0f, -5.0f, 0.0f);
+        private Vector3 _eye = new Vector3(0.0f, 0.0f, 0.0f);
 
         private Quaternion _targetRotation = Quaternion.Identity;
         //private Quaternion _currentRotation = Quaternion.Identity;
