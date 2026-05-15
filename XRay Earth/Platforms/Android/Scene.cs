@@ -14,26 +14,6 @@ namespace XRay_Earth.Platforms.Android
 
         private List<Mesh> _renderQueue = new List<Mesh>();
 
-        private float _latitude = 0f;
-        private float _longitude = 0f;
-        private float _altitude = 0f;
-
-        public float Latitude
-        {
-            get { return _latitude; }
-            set { _latitude = value; }
-        }
-        public float Longitude
-        {
-            get { return _longitude; }
-            set { _longitude = value; }
-        }
-        public float Altitude
-        {
-            get { return _altitude; }
-            set { _altitude = value; }
-        }
-
         public IReadOnlyList<Mesh> RenderQueue
         {
             get { return _renderQueue; }

@@ -23,7 +23,7 @@ namespace XRay_Earth
         private Vector3 _eye = new Vector3(0.0f, -2.0f, 0.0f);
 
         private Quaternion _targetRotation = Quaternion.Identity;
-        //private Quaternion _currentRotation = Quaternion.Identity;
+        private Quaternion _declinationCorrection = Quaternion.Identity;
 
         private int _height = 0;
         private int _width = 0;
@@ -100,6 +100,12 @@ namespace XRay_Earth
             }
         }
 
+        public Quaternion DeclinationCorrection
+        {
+            get { return _declinationCorrection; }
+            set { _declinationCorrection = value; }
+        }
+
 
         public (int Width, int Height, float Fov, float DepthNear, float DepthFar) ProjectionSettings
         {
@@ -150,13 +156,12 @@ namespace XRay_Earth
 
         public void UpdateViewMatrix()
         {
-            // _currentRotation = Quaternion.Slerp(_currentRotation, _targetRotation, 1f); // Was used for view smoothing but it seems it is no longer necessary. Leaving here incase that changes
             RecalculateViewMatrix();
         }
 
         private void RecalculateViewMatrix()
         {
-            Matrix4 rotation = Matrix4.CreateFromQuaternion(_targetRotation);   // Change to param to _currentRotation and uncomment slerp line for view smoothing.
+            Matrix4 rotation = Matrix4.CreateFromQuaternion(_targetRotation * _declinationCorrection);
             Matrix4 translation = Matrix4.CreateTranslation(-_eye);
             Matrix4 viewMatrix = translation * rotation;
 
@@ -177,6 +182,7 @@ namespace XRay_Earth
                 float[] projectionArray = new float[16];
                 UtilLib.FillMatrix4Array(projectionMatrix, projectionArray);
                 _projectionArray = projectionArray;
+
         }
     }
 }

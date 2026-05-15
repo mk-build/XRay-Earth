@@ -1,4 +1,11 @@
-﻿namespace XRay_Earth
+﻿using Android.Hardware;
+using OpenTK.Mathematics;
+using System.Numerics;
+using Vector3 = OpenTK.Mathematics.Vector3;
+using Quaternion = OpenTK.Mathematics.Quaternion;
+
+namespace XRay_Earth
+
 {
     public partial class MainPage : ContentPage
     {
@@ -15,8 +22,16 @@
             var status = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
             if (status == PermissionStatus.Granted)
             {
-                var location = await Geolocation.GetLocationAsync();
-                
+                Location location = await Geolocation.GetLocationAsync();
+
+                GeomagneticField geoField = new GeomagneticField(
+                    (float)location.Latitude,
+                    (float)location.Longitude,
+                    (float)(location.Altitude ?? 0),
+                    DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                    );
+
+                Camera.Instance.DeclinationCorrection = Quaternion.FromAxisAngle(Vector3.UnitZ, MathHelper.DegreesToRadians(geoField.Declination));
             }
         }
 
