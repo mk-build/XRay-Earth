@@ -7,10 +7,17 @@
             InitializeComponent();
         }
 
-        protected override void OnAppearing()
+        protected override async void OnAppearing()
         {
             base.OnAppearing();
             Task.Delay(500).ContinueWith(_ => StartOrientationSensor());
+
+            var status = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+            if (status == PermissionStatus.Granted)
+            {
+                var location = await Geolocation.GetLocationAsync();
+                
+            }
         }
 
         protected override void OnDisappearing()

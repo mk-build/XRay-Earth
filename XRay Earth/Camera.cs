@@ -20,7 +20,7 @@ namespace XRay_Earth
         private float[] _viewArray = new float[16];
         private float[] _projectionArray;
 
-        private Vector3 _eye = new Vector3(0.0f, 0.0f, 0.0f);
+        private Vector3 _eye = new Vector3(0.0f, -2.0f, 0.0f);
 
         private Quaternion _targetRotation = Quaternion.Identity;
         //private Quaternion _currentRotation = Quaternion.Identity;
@@ -30,6 +30,8 @@ namespace XRay_Earth
         private float _fov = 60.0f;
         private float _depthNear = 0.1f;
         private float _depthFar = 100.0f;
+        private float _minFOV = 1f;
+        private float _maxFOV = 150f;
 
         public Vector3 Eye
         {
@@ -37,11 +39,25 @@ namespace XRay_Earth
             set { _eye = value; }
         }
 
-        public float Fov
+        public float FOV
         {
             get { return _fov; }
-            set { _fov = value; RecalculateProjectionMatrix(); }
+            set {
+                _fov = Math.Clamp(value, _minFOV, _maxFOV); 
+                RecalculateProjectionMatrix();
+            }
         }
+        public float MinFOV
+        {
+            get { return _minFOV; }
+            set { _minFOV = Math.Clamp(value, 0.01f, 179.99f); }
+        }
+        public float MaxFOV
+        {
+            get { return _maxFOV; }
+            set { _maxFOV = Math.Clamp(value, 0.01f, 179.99f); }
+        }
+
         public float DepthNear
         {
             get { return _depthNear; }

@@ -14,6 +14,8 @@ namespace XRay_Earth.Platforms.Android
             //  Sets background color
             GLES20.GlClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             GLES20.GlEnable(GLES20.GlDepthTest);
+            GLES20.GlEnable(0x0B44);    //  Gl Cull face raw constant. Don't know the name of the constant :/
+            GLES20.GlCullFace(GLES20.GlFront);
             Scene.Instance.Initialize();
 
         }
