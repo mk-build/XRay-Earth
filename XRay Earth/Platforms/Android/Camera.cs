@@ -2,6 +2,7 @@
 using System.Numerics;
 using Vector3 = OpenTK.Mathematics.Vector3;
 using Quaternion = OpenTK.Mathematics.Quaternion;
+using System.Diagnostics;
 
 namespace XRay_Earth
 {
@@ -20,15 +21,16 @@ namespace XRay_Earth
         private float[] _viewArray = new float[16];
         private float[] _projectionArray;
 
-        private Vector3 _eye = new Vector3(0.0f, -2.0f, 0.0f);
+        private Vector3 _eye = new Vector3(0.0f, 0f, 0.99f);
 
         private Quaternion _targetRotation = Quaternion.Identity;
         private Quaternion _declinationCorrection = Quaternion.Identity;
+        private Matrix4 _locationMatrix = Matrix4.Identity;
 
         private int _height = 0;
         private int _width = 0;
         private float _fov = 60.0f;
-        private float _depthNear = 0.1f;
+        private float _depthNear = 0.000001f;
         private float _depthFar = 100.0f;
         private float _minFOV = 1f;
         private float _maxFOV = 150f;
@@ -100,6 +102,7 @@ namespace XRay_Earth
             }
         }
 
+
         public Quaternion DeclinationCorrection
         {
             get { return _declinationCorrection; }
@@ -163,7 +166,7 @@ namespace XRay_Earth
         {
             Matrix4 rotation = Matrix4.CreateFromQuaternion(_targetRotation * _declinationCorrection);
             Matrix4 translation = Matrix4.CreateTranslation(-_eye);
-            Matrix4 viewMatrix = translation * rotation;
+            Matrix4 viewMatrix = _locationMatrix * translation * rotation;
 
             UtilLib.FillMatrix4Array(viewMatrix, _viewArray);
         }
@@ -182,6 +185,19 @@ namespace XRay_Earth
                 float[] projectionArray = new float[16];
                 UtilLib.FillMatrix4Array(projectionMatrix, projectionArray);
                 _projectionArray = projectionArray;
+
+        }
+
+        public async void SetLocation(Location location)
+        {
+            float baseRotation = MathHelper.DegreesToRadians(-90f);
+            float latRad = (float)MathHelper.DegreesToRadians(location.Latitude);
+            float lonRad = (float)MathHelper.DegreesToRadians(-location.Longitude);
+            Vector3 locationVec3 = new Vector3(latRad + baseRotation, 0f, lonRad);
+
+            Quaternion rotation = Quaternion.FromEulerAngles (locationVec3);
+
+            _locationMatrix = Matrix4.CreateFromQuaternion(rotation);
 
         }
     }

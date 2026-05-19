@@ -23,6 +23,7 @@ namespace XRay_Earth
             if (status == PermissionStatus.Granted)
             {
                 Location location = await Geolocation.GetLocationAsync();
+                Camera.Instance.SetLocation(location);
 
                 GeomagneticField geoField = new GeomagneticField(
                     (float)location.Latitude,
@@ -50,7 +51,7 @@ namespace XRay_Earth
             if (OrientationSensor.Default.IsSupported)
             {
                 OrientationSensor.Default.ReadingChanged += OnOrientationChanged;
-                OrientationSensor.Default.Start(SensorSpeed.Fastest);
+                OrientationSensor.Default.Start(SensorSpeed.Game);
             }
         }
 

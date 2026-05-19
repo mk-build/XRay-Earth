@@ -39,7 +39,7 @@ namespace XRay_Earth.Platforms.Android
             varying vec2 vUV;
             uniform sampler2D uTexture;
             void main() {
-                gl_FragColor = texture2D(uTexture, vec2(1.0 - vUV.x, 1.0 - vUV.y));                
+                gl_FragColor = texture2D(uTexture, vec2(vUV.x, 1.0 - vUV.y));                
             }";
 
             string[] attributeNames = { "aPosition","aUV","aNormal" };
@@ -70,10 +70,15 @@ namespace XRay_Earth.Platforms.Android
             ObjGeometry earth_North_Geo = new ObjGeometry("earthNorth.obj");
             ObjGeometry earth_South_Geo = new ObjGeometry("earthSouth.obj");
 
-            Mesh earth_North_Mesh_1 = new Mesh(earth_North_Geo, shaderProgram, worldmap_Texture_A1);
-            Mesh earth_North_Mesh_2 = new Mesh(earth_North_Geo, shaderProgram, worldmap_Texture_B1);
-            Mesh earth_North_Mesh_3 = new Mesh(earth_North_Geo, shaderProgram, worldmap_Texture_C1);
-            Mesh earth_North_Mesh_4 = new Mesh(earth_North_Geo, shaderProgram, worldmap_Texture_D1);
+            Mesh earth_North_Mesh_1 = new Mesh(earth_North_Geo, shaderProgram, worldmap_Texture_D1);
+            Mesh earth_North_Mesh_2 = new Mesh(earth_North_Geo, shaderProgram, worldmap_Texture_C1);
+            Mesh earth_North_Mesh_3 = new Mesh(earth_North_Geo, shaderProgram, worldmap_Texture_B1);
+            Mesh earth_North_Mesh_4 = new Mesh(earth_North_Geo, shaderProgram, worldmap_Texture_A1);
+
+            //Mesh earth_North_Mesh_1 = new Mesh(earth_North_Geo, shaderProgram, uv_grid);
+            //Mesh earth_North_Mesh_2 = new Mesh(earth_North_Geo, shaderProgram, uv_grid);
+            //Mesh earth_North_Mesh_3 = new Mesh(earth_North_Geo, shaderProgram, uv_grid);
+            //Mesh earth_North_Mesh_4 = new Mesh(earth_North_Geo, shaderProgram, uv_grid);
 
             earth_North_Mesh_1.Position = northPosition;
             earth_North_Mesh_2.Position = northPosition;
@@ -90,10 +95,15 @@ namespace XRay_Earth.Platforms.Android
             AddMeshToRenderQueue(earth_North_Mesh_3);
             AddMeshToRenderQueue(earth_North_Mesh_4);
 
-            Mesh earth_South_Mesh_1 = new Mesh(earth_South_Geo, shaderProgram, worldmap_Texture_A2);
-            Mesh earth_South_Mesh_2 = new Mesh(earth_South_Geo, shaderProgram, worldmap_Texture_B2);
-            Mesh earth_South_Mesh_3 = new Mesh(earth_South_Geo, shaderProgram, worldmap_Texture_C2);
-            Mesh earth_South_Mesh_4 = new Mesh(earth_South_Geo, shaderProgram, worldmap_Texture_D2);
+            Mesh earth_South_Mesh_1 = new Mesh(earth_South_Geo, shaderProgram, worldmap_Texture_D2);
+            Mesh earth_South_Mesh_2 = new Mesh(earth_South_Geo, shaderProgram, worldmap_Texture_C2);
+            Mesh earth_South_Mesh_3 = new Mesh(earth_South_Geo, shaderProgram, worldmap_Texture_B2);
+            Mesh earth_South_Mesh_4 = new Mesh(earth_South_Geo, shaderProgram, worldmap_Texture_A2);
+
+            //Mesh earth_South_Mesh_1 = new Mesh(earth_South_Geo, shaderProgram, uv_grid);
+            //Mesh earth_South_Mesh_2 = new Mesh(earth_South_Geo, shaderProgram, uv_grid);
+            //Mesh earth_South_Mesh_3 = new Mesh(earth_South_Geo, shaderProgram, uv_grid);
+            //Mesh earth_South_Mesh_4 = new Mesh(earth_South_Geo, shaderProgram, uv_grid);
 
             earth_South_Mesh_1.Position = southPosition;
             earth_South_Mesh_2.Position = southPosition;
