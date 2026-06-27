@@ -15,6 +15,7 @@ namespace XRay_Earth.Platforms.Android
         private ObjGeometry _geometry;
         private ShaderProgram _shaderProgram;
         private Texture _texture;
+        private Camera _camera;
 
         private bool _geometryUploaded = false;
         private bool _rebuildModelArray = true;
@@ -70,19 +71,22 @@ namespace XRay_Earth.Platforms.Android
         }
 
 
-        public Mesh(ObjGeometry geometry, ShaderProgram shader)
+        public Mesh(ObjGeometry geometry, ShaderProgram shader, Camera.Type type)
         {
             _geometry = geometry;
             _shaderProgram = shader;
+            _camera = Camera.GetCamera(type);
 
             SetupBuffers();
+            
         }
 
-        public Mesh(ObjGeometry geometry, ShaderProgram shader, Texture texture)
+        public Mesh(ObjGeometry geometry, ShaderProgram shader, Texture texture, Camera.Type type)
         {
             _texture = texture;
             _geometry = geometry;
             _shaderProgram = shader;
+            _camera = Camera.GetCamera(type);
 
             SetupBuffers();
         }
@@ -131,8 +135,8 @@ namespace XRay_Earth.Platforms.Android
             //  View matrix contains position and rotation information for the camera
             //  Projection matrix contains camera properties such as fov, display size and clipping plane distances.
             GLES20.GlUniformMatrix4fv(_shaderProgram.GetUniformLocation(_shaderProgram.UniformNames[0]), 1, false, _modelArray, 0);
-            GLES20.GlUniformMatrix4fv(_shaderProgram.GetUniformLocation(_shaderProgram.UniformNames[1]), 1, false, Camera.Instance.ViewArray, 0);
-            GLES20.GlUniformMatrix4fv(_shaderProgram.GetUniformLocation(_shaderProgram.UniformNames[2]), 1, false, Camera.Instance.ProjectionArray, 0);
+            GLES20.GlUniformMatrix4fv(_shaderProgram.GetUniformLocation(_shaderProgram.UniformNames[1]), 1, false, _camera.ViewArray, 0);
+            GLES20.GlUniformMatrix4fv(_shaderProgram.GetUniformLocation(_shaderProgram.UniformNames[2]), 1, false, _camera.ProjectionArray, 0);
 
             // sets up texture to be used on the mesh if there is a texture
             if (_texture != null)

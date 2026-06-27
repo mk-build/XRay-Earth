@@ -45,9 +45,7 @@ namespace XRay_Earth.Platforms.Android
             string[] attributeNames = { "aPosition","aUV","aNormal" };
             string[] uniformNames = { "uModel", "uView", "uProjection", "uTexture" };
 
-
             ShaderProgram shaderProgram = new ShaderProgram(VertexShaderSource, FragmentShaderSource, attributeNames, uniformNames);
-            Texture uv_grid = new Texture("uv_grid.png");
 
             Texture worldmap_Texture_A1 = new Texture("worldmap_4k_A1.png");
             Texture worldmap_Texture_B1 = new Texture("worldmap_4k_B1.png");
@@ -70,15 +68,10 @@ namespace XRay_Earth.Platforms.Android
             ObjGeometry earth_North_Geo = new ObjGeometry("earthNorth.obj");
             ObjGeometry earth_South_Geo = new ObjGeometry("earthSouth.obj");
 
-            Mesh earth_North_Mesh_1 = new Mesh(earth_North_Geo, shaderProgram, worldmap_Texture_D1);
-            Mesh earth_North_Mesh_2 = new Mesh(earth_North_Geo, shaderProgram, worldmap_Texture_C1);
-            Mesh earth_North_Mesh_3 = new Mesh(earth_North_Geo, shaderProgram, worldmap_Texture_B1);
-            Mesh earth_North_Mesh_4 = new Mesh(earth_North_Geo, shaderProgram, worldmap_Texture_A1);
-
-            //Mesh earth_North_Mesh_1 = new Mesh(earth_North_Geo, shaderProgram, uv_grid);
-            //Mesh earth_North_Mesh_2 = new Mesh(earth_North_Geo, shaderProgram, uv_grid);
-            //Mesh earth_North_Mesh_3 = new Mesh(earth_North_Geo, shaderProgram, uv_grid);
-            //Mesh earth_North_Mesh_4 = new Mesh(earth_North_Geo, shaderProgram, uv_grid);
+            Mesh earth_North_Mesh_1 = new Mesh(earth_North_Geo, shaderProgram, worldmap_Texture_D1, Camera.Type.Main);
+            Mesh earth_North_Mesh_2 = new Mesh(earth_North_Geo, shaderProgram, worldmap_Texture_C1, Camera.Type.Main);
+            Mesh earth_North_Mesh_3 = new Mesh(earth_North_Geo, shaderProgram, worldmap_Texture_B1, Camera.Type.Main);
+            Mesh earth_North_Mesh_4 = new Mesh(earth_North_Geo, shaderProgram, worldmap_Texture_A1, Camera.Type.Main);
 
             earth_North_Mesh_1.Position = northPosition;
             earth_North_Mesh_2.Position = northPosition;
@@ -95,15 +88,10 @@ namespace XRay_Earth.Platforms.Android
             AddMeshToRenderQueue(earth_North_Mesh_3);
             AddMeshToRenderQueue(earth_North_Mesh_4);
 
-            Mesh earth_South_Mesh_1 = new Mesh(earth_South_Geo, shaderProgram, worldmap_Texture_D2);
-            Mesh earth_South_Mesh_2 = new Mesh(earth_South_Geo, shaderProgram, worldmap_Texture_C2);
-            Mesh earth_South_Mesh_3 = new Mesh(earth_South_Geo, shaderProgram, worldmap_Texture_B2);
-            Mesh earth_South_Mesh_4 = new Mesh(earth_South_Geo, shaderProgram, worldmap_Texture_A2);
-
-            //Mesh earth_South_Mesh_1 = new Mesh(earth_South_Geo, shaderProgram, uv_grid);
-            //Mesh earth_South_Mesh_2 = new Mesh(earth_South_Geo, shaderProgram, uv_grid);
-            //Mesh earth_South_Mesh_3 = new Mesh(earth_South_Geo, shaderProgram, uv_grid);
-            //Mesh earth_South_Mesh_4 = new Mesh(earth_South_Geo, shaderProgram, uv_grid);
+            Mesh earth_South_Mesh_1 = new Mesh(earth_South_Geo, shaderProgram, worldmap_Texture_D2, Camera.Type.Main);
+            Mesh earth_South_Mesh_2 = new Mesh(earth_South_Geo, shaderProgram, worldmap_Texture_C2, Camera.Type.Main);
+            Mesh earth_South_Mesh_3 = new Mesh(earth_South_Geo, shaderProgram, worldmap_Texture_B2, Camera.Type.Main);
+            Mesh earth_South_Mesh_4 = new Mesh(earth_South_Geo, shaderProgram, worldmap_Texture_A2, Camera.Type.Main);
 
             earth_South_Mesh_1.Position = southPosition;
             earth_South_Mesh_2.Position = southPosition;
@@ -119,16 +107,6 @@ namespace XRay_Earth.Platforms.Android
             AddMeshToRenderQueue(earth_South_Mesh_2);
             AddMeshToRenderQueue(earth_South_Mesh_3);
             AddMeshToRenderQueue(earth_South_Mesh_4);
-
-
-
-            //ObjGeometry monkey_Geo = new ObjGeometry("monkey.obj");
-            //Mesh monkey_Mesh = new Mesh(monkey_Geo, shaderProgram, texture);
-            //monkey_Mesh.Position = northPosition;
-            //monkey_Mesh.Scale = new Vector3(0.25f, 0.25f, 0.25f);
-            //AddMeshToRenderQueue(monkey_Mesh);
-
-
         }
 
         public void AddMeshToRenderQueue(Mesh mesh)

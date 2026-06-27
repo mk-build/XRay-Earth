@@ -23,13 +23,15 @@ namespace XRay_Earth.Platforms.Android
         public void OnSurfaceChanged(IGL10? gl, int width, int height)
         {
             GLES20.GlViewport(0, 0, width, height);
-            Camera.Instance.ScreenDimensions = (width, height);
+            Camera.GetCamera(Camera.Type.Main).ViewPortDimensions = (width, height);
+            Camera.GetCamera(Camera.Type.Compass).ViewPortDimensions = (width, height);
         }
 
         public void OnDrawFrame(IGL10? gl)
         {
 
-            Camera.Instance.UpdateViewMatrix();
+            Camera.GetCamera(Camera.Type.Main).UpdateViewMatrix();
+            Camera.GetCamera(Camera.Type.Compass).UpdateViewMatrix();
 
             GLES20.GlClear(GLES20.GlColorBufferBit | GLES20.GlDepthBufferBit);
             foreach (Mesh mesh in Scene.Instance.RenderQueue)

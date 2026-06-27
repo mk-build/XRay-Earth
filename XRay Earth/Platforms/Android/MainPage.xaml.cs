@@ -9,6 +9,8 @@ namespace XRay_Earth
 {
     public partial class MainPage : ContentPage
     {
+        Quaternion DeclinationCorrection = Quaternion.Identity;
+
         public MainPage()
         {
             InitializeComponent();
@@ -23,7 +25,13 @@ namespace XRay_Earth
             if (status == PermissionStatus.Granted)
             {
                 Location location = await Geolocation.GetLocationAsync();
-                Camera.Instance.SetLocation(location);
+
+                float baseRotation = MathHelper.DegreesToRadians(-90f);
+                float latRad = (float)MathHelper.DegreesToRadians(location.Latitude);
+                float lonRad = (float)MathHelper.DegreesToRadians(-location.Longitude);
+                Vector3 locationVec3 = new Vector3(latRad + baseRotation, 0f, lonRad);
+
+                Camera.GetCamera(Camera.Type.Main).BaseRotation = Quaternion.FromEulerAngles(locationVec3);
 
                 GeomagneticField geoField = new GeomagneticField(
                     (float)location.Latitude,
@@ -32,7 +40,7 @@ namespace XRay_Earth
                     DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
                     );
 
-                Camera.Instance.DeclinationCorrection = Quaternion.FromAxisAngle(Vector3.UnitZ, MathHelper.DegreesToRadians(geoField.Declination));
+                DeclinationCorrection = Quaternion.FromAxisAngle(Vector3.UnitZ, MathHelper.DegreesToRadians(geoField.Declination));
             }
         }
 
@@ -57,7 +65,7 @@ namespace XRay_Earth
 
         private void OnOrientationChanged(object? sender, OrientationSensorChangedEventArgs e)
         {
-            Camera.Instance.Rotation = e.Reading.Orientation;            
+            Camera.GetCamera(Camera.Type.Main).Rotation = ((Quaternion)e.Reading.Orientation).Inverted() * DeclinationCorrection;
         }
     }
 }

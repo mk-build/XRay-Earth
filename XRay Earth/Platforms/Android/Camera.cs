@@ -8,7 +8,13 @@ namespace XRay_Earth
 {
     internal class Camera
     {
-        public static Camera Instance { get; } = new Camera();
+        private static Dictionary<Type, Camera> _cameraDictionary = new Dictionary<Type, Camera>();
+
+        public enum Type
+        {
+            Main, Compass
+        }
+
         private Camera() {
 
             RecalculateViewMatrix();
@@ -16,16 +22,14 @@ namespace XRay_Earth
         }
 
         private const string SCREEN_SIZE_ERROR = "Screen dimensions must be greater than zero.";
-        private readonly object _lock = new object();
 
         private float[] _viewArray = new float[16];
         private float[] _projectionArray;
 
-        private Vector3 _eye = new Vector3(0.0f, 0f, 0.99f);
+        private Vector3 _eye = new Vector3(0.0f, 0.0f, 1.0f);
 
-        private Quaternion _targetRotation = Quaternion.Identity;
-        private Quaternion _declinationCorrection = Quaternion.Identity;
-        private Matrix4 _locationMatrix = Matrix4.Identity;
+        private Quaternion _lookRotation = Quaternion.Identity;
+        private Quaternion _baseRotation = Quaternion.Identity;
 
         private int _height = 0;
         private int _width = 0;
@@ -33,7 +37,7 @@ namespace XRay_Earth
         private float _depthNear = 0.000001f;
         private float _depthFar = 100.0f;
         private float _minFOV = 1f;
-        private float _maxFOV = 150f;
+        private float _maxFOV = 90f;
 
         public Vector3 Eye
         {
@@ -91,24 +95,18 @@ namespace XRay_Earth
             }
         }
 
-        public System.Numerics.Quaternion Rotation
+        public Quaternion Rotation
         {
             set
             {
-                _targetRotation.X = -value.X;
-                _targetRotation.Y = -value.Y;
-                _targetRotation.Z = -value.Z;
-                _targetRotation.W = value.W;
+                _lookRotation = value;
             }
         }
 
-
-        public Quaternion DeclinationCorrection
+        public Quaternion BaseRotation
         {
-            get { return _declinationCorrection; }
-            set { _declinationCorrection = value; }
+            set { _baseRotation = value; }
         }
-
 
         public (int Width, int Height, float Fov, float DepthNear, float DepthFar) ProjectionSettings
         {
@@ -126,7 +124,7 @@ namespace XRay_Earth
             }
         }
 
-        public (int Width, int Height) ScreenDimensions
+        public (int Width, int Height) ViewPortDimensions
         {
             set
             {
@@ -157,6 +155,19 @@ namespace XRay_Earth
             }
         }
 
+        public static Camera GetCamera(Type type)
+        {
+            if (_cameraDictionary.TryGetValue(type, out Camera cam)){
+
+                return cam;
+
+            } else{
+                cam = new Camera();
+                _cameraDictionary.Add(type, cam);
+                return cam;
+            }
+        }
+
         public void UpdateViewMatrix()
         {
             RecalculateViewMatrix();
@@ -164,9 +175,10 @@ namespace XRay_Earth
 
         private void RecalculateViewMatrix()
         {
-            Matrix4 rotation = Matrix4.CreateFromQuaternion(_targetRotation * _declinationCorrection);
+            Matrix4 rotation = Matrix4.CreateFromQuaternion(_lookRotation);
             Matrix4 translation = Matrix4.CreateTranslation(-_eye);
-            Matrix4 viewMatrix = _locationMatrix * translation * rotation;
+            Matrix4 baseRotation = Matrix4.CreateFromQuaternion(_baseRotation);
+            Matrix4 viewMatrix = baseRotation * translation * rotation;
 
             UtilLib.FillMatrix4Array(viewMatrix, _viewArray);
         }
@@ -185,19 +197,6 @@ namespace XRay_Earth
                 float[] projectionArray = new float[16];
                 UtilLib.FillMatrix4Array(projectionMatrix, projectionArray);
                 _projectionArray = projectionArray;
-
-        }
-
-        public async void SetLocation(Location location)
-        {
-            float baseRotation = MathHelper.DegreesToRadians(-90f);
-            float latRad = (float)MathHelper.DegreesToRadians(location.Latitude);
-            float lonRad = (float)MathHelper.DegreesToRadians(-location.Longitude);
-            Vector3 locationVec3 = new Vector3(latRad + baseRotation, 0f, lonRad);
-
-            Quaternion rotation = Quaternion.FromEulerAngles (locationVec3);
-
-            _locationMatrix = Matrix4.CreateFromQuaternion(rotation);
 
         }
     }

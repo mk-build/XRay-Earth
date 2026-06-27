@@ -29,7 +29,7 @@ namespace XRay_Earth.Platforms.Android
             {
                 // ScaleFactor > 1 means fingers spreading apart (zoom in = reduce FOV)
                 // ScaleFactor < 1 means fingers pinching together (zoom out = increase FOV)
-                Camera.Instance.FOV /= detector.ScaleFactor;
+                Camera.GetCamera(Camera.Type.Main).FOV /= detector.ScaleFactor;
                 return true;
             }
         }
